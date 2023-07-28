@@ -3,6 +3,7 @@ from logging import basicConfig, INFO
 from aiogram import types, executor
 from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove
 
+import handlers
 from data.config import ADMINS
 from loader import dp, db
 
