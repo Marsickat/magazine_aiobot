@@ -1,16 +1,53 @@
-# This is a sample Python script.
+from logging import basicConfig, INFO
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from aiogram import types, executor
+from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove
+
+from data.config import ADMINS
+from loader import dp, db
+
+user_message = "Пользователь"
+admin_message = "Админ"
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@dp.message_handler(commands="start")
+async def cmd_start(message: types.Message):
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.row(user_message, admin_message)
+
+    await message.answer("""Привет!
+
+Я бот-магазин по продаже товаров любой категории.
+
+Чтобы перейти в каталог и выбрать приглянувшиеся
+товары воспользуйтесь командой /menu.
+
+Возникли вопросы? Не проблема! Команда /sos поможет
+связаться с админами, которые постараются как можно быстрее откликнуться.""", reply_markup=markup)
 
 
-# Press the green button in the gutter to run the script.
+@dp.message_handler(text=admin_message)
+async def admin_mode(message: types.Message):
+    cid = message.chat.id
+    if cid not in ADMINS:
+        ADMINS.append(cid)
+
+    await message.answer("Включён админский режим.", reply_markup=ReplyKeyboardRemove())
+
+
+@dp.message_handler(text=user_message)
+async def admin_mode(message: types.Message):
+    cid = message.chat.id
+    if cid in ADMINS:
+        ADMINS.remove(cid)
+
+    await message.answer("Включён пользовательский режим.", reply_markup=ReplyKeyboardRemove())
+
+
+async def on_startup(dp):
+    basicConfig(level=INFO)
+    db.create_tables()
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    executor.start_polling(dp, on_startup=on_startup, skip_updates=True)
