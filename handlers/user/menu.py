@@ -1,6 +1,7 @@
 from aiogram.types import Message, ReplyKeyboardMarkup
-from loader import dp
+
 from filters import IsAdmin, IsUser
+from loader import dp
 
 catalog = "Каталог"
 cart = "Корзина"
